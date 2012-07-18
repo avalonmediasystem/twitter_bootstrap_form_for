@@ -162,8 +162,9 @@ class TwitterBootstrapFormFor::FormControls < ActionView::Helpers::FormBuilder
       classes = [ "input", add_on ].compact.join('-')
 
       template.content_tag(tag, :class => classes) do
-        template.concat super attribute, *(args << options)
+        # Put the error span ahead of the field
         template.concat self.error_span(attribute) if self.errors_on?(attribute)
+        template.concat super attribute, *(args << options)
         block.call if block.present?
       end
     end
@@ -192,9 +193,9 @@ class TwitterBootstrapFormFor::FormControls < ActionView::Helpers::FormBuilder
   protected
 
   def error_span(attribute, options = {})
-    options[:class] = _merge_classes options[:class], 'help-inline'
+    options[:class] = _merge_classes options[:class], 'clearfix help-block'
 
-    template.content_tag :span,
+    template.content_tag :p,
       self.errors_for(attribute),
       :class => options[:class]
   end
