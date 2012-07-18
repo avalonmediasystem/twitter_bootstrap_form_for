@@ -93,11 +93,11 @@ class TwitterBootstrapFormFor::FormBuilder < ActionView::Helpers::FormBuilder
 
       self.div_wrapper(attribute, :class => 'control-group') do
         template.concat self.label(attribute, label) if label
+
         template.concat template.content_tag(:div, :class => classes.join(' ')) {
-          block.call if block.present? and classes.include?('input-prepend')
+          template.concat error_messages(attribute)
           template.concat super(attribute, *(args << options))
-          template.concat error_span(attribute)
-          block.call if block.present? and classes.include?('input-append')
+          block.call if block.present?
         }
       end
     end
@@ -117,7 +117,7 @@ class TwitterBootstrapFormFor::FormBuilder < ActionView::Helpers::FormBuilder
         }
         if toggle == :check_box
           template.concat template.content_tag(:div, :class => "clearfix error") {
-            template.concat error_span(attribute)
+            template.concat error_messages(attribute)
           } if errors_on?(attribute)
         end
       end
@@ -138,11 +138,11 @@ class TwitterBootstrapFormFor::FormBuilder < ActionView::Helpers::FormBuilder
     template.content_tag :div, options, &block
   end
 
-  def error_span(attribute, options = {})
-    options[:class] ||= 'help-inline'
+  def error_messages(attribute, options = {})
+    options[:class] ||= 'help-block clearfix'
 
     template.content_tag(
-      :span, self.errors_for(attribute),
+      :p, self.errors_for(attribute),
       :class => options[:class]
     ) if self.errors_on?(attribute)
   end
