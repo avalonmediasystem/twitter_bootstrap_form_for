@@ -103,6 +103,12 @@ class TwitterBootstrapFormFor::FormBuilder < ActionView::Helpers::FormBuilder
     end
   end
 
+  # Renders a set of text fields within a single container as opposed to requiring
+  # you to repeat them over and over.
+  def text_fields(value = nil, options = {}, &block)
+    @template.send(:text_fields, *attrs, &block)
+  end
+
   protected
 
   def errors_on?(attribute)
