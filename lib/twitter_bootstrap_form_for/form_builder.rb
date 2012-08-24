@@ -105,8 +105,42 @@ class TwitterBootstrapFormFor::FormBuilder < ActionView::Helpers::FormBuilder
 
   # Renders a set of text fields within a single container as opposed to requiring
   # you to repeat them over and over.
-  def text_fields(value = nil, options = {}, &block)
-    @template.send(:text_fields, *attrs, &block)
+  #
+  # Important arguments that can be added include
+  # - value
+  # - class
+  # - count (minimum number of fields)
+  def text_fields(attribute, label, *args, &block)
+    logger.debug "<< TEXT_FIELDS >>"
+    logger.debug "<< ARGS => #{args} >>"
+    
+    options = args.extract_options!
+    text = args.any? ? args.shift : ''
+    
+    logger.debug "<< ATTRIBUTE => #{attribute} >>"
+    logger.debug "<< ARGS => #{args} >>"
+    logger.debug "<< OPTIONS => #{options} >>"
+    
+    # Default to three fields if no alternative is provided
+    options[:minimum_fields] = 3 if options[:minimum_fields].nil?
+    value_count = options[:value].nil? ? 0 : options[:value].length
+    iterations = [options[:minimum_fields], value_count].max
+    
+    # Extract the values so that you can iterate over them individually. Initialize
+    # to an empty array if it is nil to prevent exceptions later down the road.
+    values = options[:value].nil? ? [] : options[:value]
+    options.delete(:value)
+    
+    self.label(attribute, label) do |builder|
+      iterations.times do |i|
+        inherited_options = options
+        inherited_options[:value] = values[i]
+        
+        logger.debug "<< WITHIN ITERATION #{i} >>"
+        logger.debug "<< OPTIONS => #{inherited_options} >>"
+        template.concat builder.send(:text_field, attribute, inherited_options, &block)
+      end
+    end
   end
 
   protected
