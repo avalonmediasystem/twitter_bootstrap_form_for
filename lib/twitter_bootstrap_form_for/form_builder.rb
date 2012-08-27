@@ -138,7 +138,7 @@ class TwitterBootstrapFormFor::FormBuilder < ActionView::Helpers::FormBuilder
         
         logger.debug "<< WITHIN ITERATION #{i} >>"
         logger.debug "<< OPTIONS => #{inherited_options} >>"
-        template.concat builder.send(:text_field, attribute, inherited_options, &block)
+        template.concat builder.send(:text_field, "#{attribute.to_s}[#{i}]", inherited_options, &block)
       end
     end
   end
