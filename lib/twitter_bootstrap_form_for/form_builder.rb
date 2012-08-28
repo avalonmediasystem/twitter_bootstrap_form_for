@@ -125,6 +125,7 @@ class TwitterBootstrapFormFor::FormBuilder < ActionView::Helpers::FormBuilder
     options[:minimum_fields] = 3 if options[:minimum_fields].nil?
     value_count = options[:value].nil? ? 0 : options[:value].length
     iterations = [options[:minimum_fields], value_count].max
+    options.delete(:minimum_fields)
     
     # Extract the values so that you can iterate over them individually. Initialize
     # to an empty array if it is nil to prevent exceptions later down the road.
@@ -132,13 +133,17 @@ class TwitterBootstrapFormFor::FormBuilder < ActionView::Helpers::FormBuilder
     options.delete(:value)
     
     self.label(attribute, label) do |builder|
-      iterations.times do |i|
-        inherited_options = options
-        inherited_options[:value] = values[i]
-        
-        logger.debug "<< WITHIN ITERATION #{i} >>"
-        logger.debug "<< OPTIONS => #{inherited_options} >>"
-        template.concat builder.send(:text_field, "#{attribute}[]", inherited_options, &block)
+      template.fields_for("#{@object_name}[]", attribute) do |indexed_form|
+        iterations.times do |i|
+          inherited_options = options
+          inherited_options[:value] = values[i]
+          inherited_options[:id] = "#{@object_name}_#{attribute}_#{i}"
+
+          logger.debug "<< WITHIN ITERATION #{i} >>"
+          logger.debug "<< OPTIONS => #{inherited_options} >>"
+          logger.debug "<< #{indexed_form.send(:text_field, '', inherited_options, &block)} >>"
+          template.concat indexed_form.send(:text_field, '', inherited_options, &block)
+        end
       end
     end
   end
