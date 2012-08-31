@@ -1,3 +1,3 @@
 module TwitterBootstrapFormFor
-  VERSION = '2.0.1.0.rc1-a'
+  VERSION = '2.0.1.0.rc2'
 end
