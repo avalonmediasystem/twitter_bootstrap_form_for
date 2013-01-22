@@ -111,15 +111,8 @@ class TwitterBootstrapFormFor::FormBuilder < ActionView::Helpers::FormBuilder
   # - class
   # - count (minimum number of fields)
   def text_fields(attribute, label, *args, &block)
-    logger.debug "<< TEXT_FIELDS >>"
-    logger.debug "<< ARGS => #{args} >>"
-    
     options = args.extract_options!
     text = args.any? ? args.shift : ''
-    
-    logger.debug "<< ATTRIBUTE => #{attribute} >>"
-    logger.debug "<< ARGS => #{args} >>"
-    logger.debug "<< OPTIONS => #{options} >>"
     
     # Default to three fields if no alternative is provided
     options[:minimum_fields] = 3 if options[:minimum_fields].nil?
@@ -132,16 +125,21 @@ class TwitterBootstrapFormFor::FormBuilder < ActionView::Helpers::FormBuilder
     values = options[:value].nil? ? [] : options[:value]
     options.delete(:value)
     
-    self.label(attribute, label) do |builder|
+    # Look for the existance of a dynamic option. If set add an HTML5 data property
+    # to the form which can be picked up by Javascript to add the ability to add and
+    # remove fields withot a page refresh
+    label_classes = {}
+    if true == options[:dynamic] 
+      label_classes = {'data-dynamic' => 'true'} 
+    end
+
+    self.label(attribute, label, label_classes) do |builder|
       template.fields_for("#{@object_name}[]", attribute) do |indexed_form|
         iterations.times do |i|
           inherited_options = options
           inherited_options[:value] = values[i]
           inherited_options[:id] = "#{@object_name}_#{attribute}_#{i}"
 
-          logger.debug "<< WITHIN ITERATION #{i} >>"
-          logger.debug "<< OPTIONS => #{inherited_options} >>"
-          logger.debug "<< #{indexed_form.send(:text_field, '', inherited_options, &block)} >>"
           template.concat indexed_form.send(:text_field, '', inherited_options, &block)
         end
       end
