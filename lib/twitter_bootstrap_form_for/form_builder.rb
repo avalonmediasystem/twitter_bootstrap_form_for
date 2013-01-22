@@ -60,7 +60,12 @@ class TwitterBootstrapFormFor::FormBuilder < ActionView::Helpers::FormBuilder
         when text              then template.label_tag(nil, text, options, &nil)
       end
 
-      template.concat template.content_tag(:div, :class => 'controls') {
+      control_attributes = {}
+      if true == options[:dynamic]
+        control_attributes << {'data-dynamic' => 'true'}
+      end
+
+      template.concat template.content_tag(:div, :class => 'controls', control_attributes) {
         template.fields_for(
           self.object_name,
           self.object,
@@ -125,15 +130,7 @@ class TwitterBootstrapFormFor::FormBuilder < ActionView::Helpers::FormBuilder
     values = options[:value].nil? ? [] : options[:value]
     options.delete(:value)
     
-    # Look for the existance of a dynamic option. If set add an HTML5 data property
-    # to the form which can be picked up by Javascript to add the ability to add and
-    # remove fields withot a page refresh
-    label_classes = {}
-    if true == options[:dynamic] 
-      label_classes = {'data-dynamic' => 'true'} 
-    end
-
-    self.label(attribute, label, label_classes) do |builder|
+    self.label(attribute, label, options) do |builder|
       template.fields_for("#{@object_name}[]", attribute) do |indexed_form|
         iterations.times do |i|
           inherited_options = options
