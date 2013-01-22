@@ -49,6 +49,8 @@ class TwitterBootstrapFormFor::FormBuilder < ActionView::Helpers::FormBuilder
   def label(attribute, text = '', options = {}, &block)
     text, attribute = attribute, nil if attribute.kind_of? String
 
+    logger.debug "<< Options => #{options} >>"
+
     options = { :class => 'control-label' }.merge(options)
     id      = _wrapper_id      attribute, 'control_group'
     classes = _wrapper_classes attribute, 'control-group'
@@ -61,6 +63,7 @@ class TwitterBootstrapFormFor::FormBuilder < ActionView::Helpers::FormBuilder
       end
 
       control_attributes = {}
+      logger.debug "<< Options => #{options} >>"
       if true == options[:dynamic]
         control_attributes << {'data-dynamic' => 'true'}
       end
@@ -132,7 +135,10 @@ class TwitterBootstrapFormFor::FormBuilder < ActionView::Helpers::FormBuilder
     
     self.label(attribute, label, options) do |builder|
       template.fields_for("#{@object_name}[]", attribute) do |indexed_form|
-        iterations.times do |i|
+	# Take out the dynamic option so it doesn't get set for every input field
+	options.delete(:dynamic)
+        
+	iterations.times do |i|
           inherited_options = options
           inherited_options[:value] = values[i]
           inherited_options[:id] = "#{@object_name}_#{attribute}_#{i}"
