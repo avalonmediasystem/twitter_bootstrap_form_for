@@ -49,11 +49,17 @@ class TwitterBootstrapFormFor::FormBuilder < ActionView::Helpers::FormBuilder
   def label(attribute, text = '', options = {}, &block)
     text, attribute = attribute, nil if attribute.kind_of? String
 
-    logger.debug "<< Options => #{options} >>"
-
     options = { :class => 'control-label' }.merge(options)
     id      = _wrapper_id      attribute, 'control_group'
     classes = _wrapper_classes attribute, 'control-group'
+
+    # Set the data attribute here even though it goes on the controls so that it does
+    # not accidentally get set on the label as well
+    data_attributes = {}
+    if true == options[:dynamic]
+      data_attributes['dynamic'] = 'true'
+      options.delete(:dynamic)
+    end
 
     template.content_tag(:div, :id => id, :class => classes) do
       template.concat case
@@ -62,13 +68,8 @@ class TwitterBootstrapFormFor::FormBuilder < ActionView::Helpers::FormBuilder
         when text              then template.label_tag(nil, text, options, &nil)
       end
 
-      control_attributes = {}
-      logger.debug "<< Options => #{options} >>"
-      if true == options[:dynamic]
-        control_attributes << {'data-dynamic' => 'true'}
-      end
-
-      template.concat template.content_tag(:div, :class => 'controls', control_attributes) {
+      template.concat template.content_tag(:div, :class => 'controls', 
+	data: data_attributes) {
         template.fields_for(
           self.object_name,
           self.object,
@@ -123,7 +124,7 @@ class TwitterBootstrapFormFor::FormBuilder < ActionView::Helpers::FormBuilder
     text = args.any? ? args.shift : ''
     
     # Default to three fields if no alternative is provided
-    options[:minimum_fields] = 3 if options[:minimum_fields].nil?
+    options[:minimum_fields] ||= 3 
     value_count = options[:value].nil? ? 0 : options[:value].length
     iterations = [options[:minimum_fields], value_count].max
     options.delete(:minimum_fields)
